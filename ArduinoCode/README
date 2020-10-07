@@ -1,0 +1,6 @@
+#아두이노 코드
+##포함될 것
+SoftwareSerial.h : (expecting RYLR896)-esp8266 - MCU(expecting ArduinoMega/NodeMCU) 시리얼 통해서 통신
+RFID.h : NFC 태그 수신
+FSR.h : 힘센서 값 수신
+(Mega 일때) esp8266.h : LoRa 모듈과 통신할 모듈
