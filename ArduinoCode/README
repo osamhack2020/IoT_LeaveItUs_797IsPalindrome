@@ -3,4 +3,6 @@
 SoftwareSerial.h : (expecting RYLR896)-esp8266 - MCU(expecting ArduinoMega/NodeMCU) 시리얼 통해서 통신
 RFID.h : NFC 태그 수신
 FSR.h : 힘센서 값 수신
-(Mega 일때) esp8266.h : LoRa 모듈과 통신할 모듈
+AnalogReader.h : FSR.h를 사용할 때 필요
+FreeRTOS_AVR.h : 아두이노는 싱글 스레드로 여러 테스크를 동시에 수행 할 수 없다.
+                 멀티스레드를 통해 rfid,fsr, door sensor, LoRa 동시에 수행
