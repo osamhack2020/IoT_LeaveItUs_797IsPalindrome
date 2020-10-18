@@ -14,35 +14,36 @@
 #define FSR_5_PIN_1	A11
 #define FSR_6_PIN_1	A7
 #define FSR_7_PIN_1	A8
-#define DOORSWITCH	2
-#define RFID_PIN_RST	3
-#define RFID_PIN_SDA	53
+#define DOORSWITCH	2 
+#define RFID_PIN_RST	3 
+#define RFID_PIN_SDA	53 
 
 // Global variables and defines
 String InSerialStr = "";
-// object initialization
+String OutSerialStr = "";
 
 MFRC522 rfid(RFID_PIN_SDA,RFID_PIN_RST); //pin 53 & 3
 
 SoftwareSerial LoRaSerial(18, 19); //RX, TX
-int PhoneStatus[3][7]; // 행: 금일 영내 여부, 무게, 반납여부
+int PhoneStatus[3][7]; // 행: 0.금일 영내 여부, 1.무게, 2.반납여부
 String RegisteredRFtag[7]; //string of registered RFtag
 String UID_from_rfid; //Info read from rfid
 byte door; //open or close
 byte UsingHourStart; //Web을 통해 불출시간 정할 수 있음
 byte UsingHourEnd; //Web을 통해 반납시간 정할 수 있음
-byte RoomNum; //생활관 번호 지정됨
+byte RoomNum = 12; //생활관 번호 지정해야 함
 
 //define task handlers
 TaskHandle_t Task_NFC_Handler;
 TaskHandle_t Task_Check_Handler;
 TaskHandle_t Task_Door_Handler;
 TaskHandle_t Task_LoRa_Rcv_Handler;
+
 // 세마포어 핸들을 선언합니다.
 SemaphoreHandle_t sem;
 //------------------------------------------------------------------------------
-//rfid, fsr, door, lora 수행함
 
+//rfid, fsr, door, lora 수행함
 //Thread1 : RFID를 통해 NFC tag 판단
 static void vNFC(void * arg){
   while(1){
@@ -64,6 +65,14 @@ static void vNFC(void * arg){
         }
       }
     }
+    
+    //LoRaSerial.print("AT+SEND=1,13,message from ");
+    //LoRaSerial.print(RoomNum);
+    //String Message = Gateway.read(); 
+    //byte comtype =Message.find(",") + 1;
+    //if(comtype == 2/5/7) -> 해당 명령
+    LoRaSerial.print("AT+SEND=1,28,"); //1 대신 gateway 주소입력
+    Serial.print("LoRa status: Sending message to gateway"); //debugging 용이하도록 시리얼 출력
     for(byte i = 0; i < 7; i++){ //불출 반납 상황 송신
       LoRaSerial.print(PhoneStatus[2][i]);
       LoRaSerial.print(" ");
@@ -83,20 +92,27 @@ static void vCheck(void * argl){
   FSR fsr6(FSR_6_PIN_1);
   FSR fsr7(FSR_7_PIN_1);
   FSR fsr[7] = {fsr1, fsr2,fsr3,fsr4,fsr5,fsr6,fsr7};
-  byte ReturnErr[7] = {0, };
+  byte ReturnErr[7] = {0,};
   while(1){
-    float weight;
-    //Serial.print(F("Force: ")); Serial.print(fsr_1Force); Serial.println(F(" [g]"));
     
     for(byte i = 0; i < 7; i++){
       if(PhoneStatus[0][i]){//반납 대상자이면
-        weight = fsr[i].getForce();
+        float weight = fsr[i].getForce(); //i번째의 무게 입력 받음
         float ratio = weight/PhoneStatus[1][i];
         if(0.9 > ratio || ratio > 1.1){//휴대폰 케이스 변경, 센서 오차 감안한 오차범위
           ReturnedErr[i] = 1;
         }
       }
     }
+    //LoRaSerial.print("AT+SEND=1,13,message from ");
+    //LoRaSerial.print(RoomNum);
+    LoRaSerial.print("AT+SEND=1,7,");
+    Serial.print("Weight check result : ");
+    for(byte i=0; i < 7, i++){
+      LoRaSerial.print(ReturnedErr[i]);
+      Serial.print(ReturnedErr[i]);
+    }
+    LoRaSerial.println();
   }
 }
 
@@ -112,22 +128,51 @@ static void vDoor(void *arg){
         unlockedHolder = 1; //alert
     }
     if (LoRaSerial.available()){
-      LoRaSerial.print("door : ");
-      LoRaSerial.println(door);
-      if(unlockedHolder)  
-        LoRaSerial.println("휴대폰 보관함 문이 임의로 열렸습니다.")
+      Serial.print("door : ");
+      Serial.println(door);
+      
+      //LoRaSerial.print("AT+SEND=1,13,message from ");
+      //LoRaSerial.print(RoomNum);
+      if(unlockedHolder){
+        String messStr += "AT+SEND=1,53,"; //이곳에 gateway address 1 대신 입력
+        messStr += "휴대폰 보관함 문이 임의로 열렸습니다." //53byte
+        LoRaSerial.println(messStr);
+      }  
     }
   }
 }
 
 //Thread4 : 로라
 static void vLoRa_Receive(void *arg){
-  RoomNum = Serial.read();
   while(1){
     if(LoRaSerial.available()){
-      PhoneStatus
+      InSerialStr = LoRaSerial.readStringUntil(':'); //Message from the web
+      
+      if(InSerialStr.startsWith("Update PhoneStatus:")){
+        for(byte i = 0; i < 3; i++){
+          for(byte j =0; j < 7; j++){
+            PhoneStatus[i][j] = LoRaSerial.read();
+          } 
+        }
+      }
+      if(InSerialStr.startsWith("Update RFtag:")){
+        for(byte i = 0; i < 7; i++){
+          RegisteredRFtag[i] = LoRaSerial.read();
+        }
+      }
+      if(InSerialStr.startsWith("Update UsingHourStart:")){ //불출시간
+        byte num = LoRaSerial.parseInt();
+        if(0 <= num & num <= 24)//correct input
+          UsingHourStart = num;
+      }
+      if(InSerialStr.startsWith("Update UsingHourEnd:")){ //반납시간
+        byte num = LoRaSerial.parseInt();
+        if(0 <= num & num <= 24)//correct input
+          UsingHourEnd = num;
+      }
+      
     }
-    InSerialStr = LoRaSerial.readStringUntil('\n');
+    
     
   }
 
@@ -135,32 +180,32 @@ void setup()
 {
     Serial.begin(115200);
     LoRaSerial.begin(115200);
-    while (!Serial); // wait for serial port to connect. Needed for native USB
     while (!Serial);
-    while(Serial.print("AT\r\n") != "OK");
+    while (!LoRaSerial);
+    LoRaSerial.print("AT\r\n");
     
-    Serial.print("AT+PARAMETER=10,7,1,7\r\n"); //For less than 3Kms
+    LoRaSerial.print("AT+PARAMETER=10,7,1,7\r\n"); //For less than 3Kms
     //LoRaSerial.print("AT+PARAMETER = 12,3,1,7\r\n"); //For more than 3kms
-    Serial.print("AT+BAND=915000000\r\n"); //Bandwidth set to 915MHz
+    LoRaSerial.print("AT+BAND=915000000\r\n"); //Bandwidth set to 915MHz
     vTaskDelay((500L * configTICK_RATE_HZ) / 1000L);
 
-    Serial.print("AT+ADDRESS=1\r\n"); //고유 주소를 가져야 한다. 부대에 따른 코드 부여: 0~65535
+    LoRaSerial.print("AT+ADDRESS=1\r\n"); //보관함 고유 주소 코드 부여: 0~65535 ex)A부대 B생활관 C보관함 = 12345 
     vTaskDelay((500L * configTICK_RATE_HZ) / 1000L);
 
-    Serial.print("AT+NETWORKID=5\r\n"); //허브와 보관함이 같아야 한다. 부대 내의 생활관 번호 부여: 0~16
+    LoRaSerial.print("AT+NETWORKID=5\r\n"); //게이트웨이와 보관함이 같아야 한다. 생활관 내에서만 통일하면 됨
     vTaskDelay((500L * configTICK_RATE_HZ) / 1000L);
 
     //initialize RFID module
     SPI.begin();
     rfid.PCD_Init();
     
-    int PhoneStatus[2][7] //WEB에서 값읽어와서 업데이트해줘야함
-    String RegisteredRFtag[7] //WEB에서 읽어와야 함
+    // int PhoneStatus[2][7] //WEB에서 값읽어와서 업데이트해줘야함
+    // String RegisteredRFtag[7] //WEB에서 읽어와야 함
     
-    xTaskCreate(vNFC,"RFID",128, NULL, Priority, &Task_NFC_Handler);
-    xTaskCreate(vCheck, "Check", 128, NULL, Priority, &Task_Check_Handler);
-    xTaskCreate(vDoor, "DoorStatus", 128, NULL, Priority, &Task_Door_Handler);
-    xTaskCreate(vLoRa_Receive, "LoRaReceive",128, NULL, Priority, &Task_LoRa_Rcv_Handler);
+    xTaskCreate(vNFC,"RFID",128, NULL, 4, &Task_NFC_Handler);
+    xTaskCreate(vCheck, "Check", 64, NULL, 1, &Task_Check_Handler);
+    xTaskCreate(vDoor, "DoorStatus", 64, NULL, 2, &Task_Door_Handler);
+    xTaskCreate(vLoRa_Receive, "LoRaReceive",128, NULL, 3, &Task_LoRa_Rcv_Handler);
     
 }
 
