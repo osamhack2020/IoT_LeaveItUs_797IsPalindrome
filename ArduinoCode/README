@@ -8,5 +8,4 @@ FreeRTOS_AVR.h : 아두이노는 싱글 스레드로 여러 테스크를 동시�
                  
 #게이트웨이
 ## 포함될 것
-SoftwareSerial.h : LoRa(RYLR896) - MCU(Raspberry pi 예상) - ETHERNET 쉴드
-SPI.h : LoRa 노드들과 1:N 통신하기 위해 필요할 것으로 예상
+SoftwareSerial.h : LoRa WAN(LG01N) : LoRa -> ETHERNET으로 변환해주는 장치
