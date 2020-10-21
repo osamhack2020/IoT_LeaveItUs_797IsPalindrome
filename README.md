@@ -1,7 +1,7 @@
 # **맡기시오** (팀 *797은거꾸로해도797*)
 ![팀 로고](logo.png)
 
-[**WEB 저장소**](https://github.com/osamhack2020/WEB_LeaveItUs_797IsPalindrome) | [**IoT 저장소**](https://github.com/osamhack2020/IoT_LeaveItUs_797IsPalindrome)
+[**문서**](document) | [**WEB 저장소**](https://github.com/osamhack2020/WEB_LeaveItUs_797IsPalindrome) | [**IoT 저장소**](https://github.com/osamhack2020/IoT_LeaveItUs_797IsPalindrome)
 
 ## 소개 및 설명 동영상
 **맡기시오 (Leave It Us)**
@@ -20,27 +20,7 @@ IoT와 Web기술을 접목하여 휴대폰에 부착된 NFC 인가 필증과 장
 
 ### 프론트앤드
 - Node 10 이상, vue-cli 4 이상, npm 필요
-- 최신 2개 버전, 점유율 1% 이상, 지원 종료 되지 않은 브라우저 버전을 목표로 빌드 및 릴리즈 됩니다.
-- 세부 지원 목록은 현재 기준 아래와 같습니다.
-```
-andoid chrome 85
-andoid firefox 79
-andoid qq 10.4
-andoid uc 12.12
-android webview 81
-baidu 7.12
-chrome 84~86
-edge 85~86
-firefox 80~81
-ie 11
-ios safari 14 13.4-13.7 13.3 12.2-12.4
-kaios 2.5
-opera mini 전 버전
-opera mobile 59
-opera 70~71
-safari 14 13.1
-samsung 12.0 11.1-11.2
-```
+- 최신 2개 버전, 점유율 1% 이상, 지원 종료 되지 않은 브라우저 버전을 목표로 빌드됩니다.
 
 ### 하드웨어
 
@@ -48,7 +28,7 @@ samsung 12.0 11.1-11.2
 ### 백앤드
 - Golang + Echo
 - SQL + gorm
-- JWT based Auth
+- HMAC based Auth
 - REST api
  
 ### 프론트앤드
@@ -61,7 +41,7 @@ samsung 12.0 11.1-11.2
 - LoRa
 - modeling with TinkerCad
 - NFC + FSR + Magnetic door sensor
-- Auth with public key
+- HMAC based Auth
 
 ## 설치 안내
 ### 프론트앤드 및 백앤드
@@ -93,8 +73,8 @@ sudo ./output/backend
 ## 프로젝트 사용법
 
 ## 팀 정보 (Team Information)
-- 김정현 (kimdictor@gmail.com), Github Id: Dictor
-- 김상윤 (ndkim11@naver.com), Github Id: ndkim11
+- 김정현 (kimdictor@gmail.com), Github [Dictor](https://github.com/Dictor)
+- 김상윤 (ndkim11@naver.com), Github [ndkim11](https://github.com/ndkim11)
 
 ## 저작권 및 사용권 정보
 [AGPL](LICENSE)
