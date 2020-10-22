@@ -28,6 +28,7 @@ int PhoneStatus[2][7]; // 행: 0.무게, 1.반납여부
 String UID_from_rfid; //Info read from rfid
 byte door; //open or close
 bool usingTime;
+bool checkActiv;
 String LockerUID = ;//보관함 UID를 ASCII 문자열로 EEPROM에 저장
 
 //define task handlers
@@ -88,12 +89,12 @@ static void vCheck(void * argl){
   FSR fsr[7] = {fsr1, fsr2,fsr3,fsr4,fsr5,fsr6,fsr7};
   byte ReturnErr[7] = {0,}; //정상 반납 여부를 저장하는 배열
   while(1){
-    for(byte i = 0; i < 7; i++){
-      float weight = fsr[i].getForce(); //i번째의 무게 입력 받음
-      float ratio = weight/PhoneStatus[0][i];
-      if(0.9 > ratio || ratio > 1.1){//휴대폰 케이스 변경, 센서 오차 감안한 오차범위
-        ReturnedErr[i] = 1;
+    if(checkActiv == 1){ //보관되어 있는 휴대폰의 무게를 검사하기를 활성화시킴
+      for(byte i = 0; i < 7; i++){
+        float weight = fsr[i].getForce(); //i번째의 무게 입력 받음
+        PhoneStatus[0][i] = (int)weight;
       }
+      checkActiv = 0;
     }
     if (runEvery(random(10000,20000))){ //10sec ~ 20sec 사이에서 임의로 전송
       LoRaSerial.print("AT+SEND=1,11,LockerUId :");
@@ -146,17 +147,14 @@ static void vLoRa_Receive(void *arg){
       while(determinator != LockerUID); //해당 보관함의 UID와 같아야 데이터 수신
       InSerialStr = LoRaSerial.readStringUntil(':'); //Message from the web
       
-      if(InSerialStr.startsWith("Update PhoneStatus:")){
-        for(byte i = 0; i < 2; i++){
-          for(byte j =0; j < 7; j++){
-            PhoneStatus[i][j] = LoRaSerial.read();
-          } 
-        }
-      }
       if(InSerialStr.startsWith("Update RFtag:")){
         for(byte i = 0; i < 7; i++){
           RegisteredRFtag[i] = LoRaSerial.read();
         }
+      }
+      
+      if(InSerialStr == "Check"){
+        checkActiv = 1; //check 활성화
       }
       // if(InSerialStr.startsWith("UsingTime:")){
       //   usingTime = LoRaSerial.read(); //1 : 불출시작, 0: 반납시작
