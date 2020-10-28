@@ -8,4 +8,7 @@ FreeRTOS_AVR.h : 아두이노는 싱글 스레드로 여러 테스크를 동시�
                  
 #게이트웨이
 ## 포함될 것
-SoftwareSerial.h : LoRa WAN(LG01N) : LoRa -> ETHERNET으로 변환해주는 장치
+SoftwareSerial.h : LoRa -> Serial로 데이터 받음
+Ethernet.h : LAN으로 HTTP request 수행
+SPI.h : Ethernet 아두이노로 수신
+ArduinoJson.h : HTTP protocol에 맞는 Json 규격으로 바꿔줌
