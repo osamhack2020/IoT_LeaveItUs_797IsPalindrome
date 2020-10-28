@@ -22,7 +22,7 @@ MFRC522 rfid(RFID_PIN_SDA,RFID_PIN_RST); //pin 53 & 3
 
 SoftwareSerial LoRaSerial(18, 19); //RX, TX
 int PhoneStatus[2][7]; // 행: 0.무게, 1.반납여부
-//String RegisteredRFtag[7]; //string of registered RFtag
+String RegisteredRFtag[7]; //string of registered RFtag
 String UID_from_rfid; //Info read from rfid
 byte door; //휴대폰 보관함이 열려있음을 알린다.
 bool checkActiv;
@@ -109,15 +109,16 @@ static void vLoRa(void *arg){
     if(LoRaSerial.available()){
       String determinator = LoRaSerial.read();
       while(determinator != LockerUID); //해당 보관함의 UID와 같아야 데이터 수신
-      InSerialStr = LoRaSerial.readStringUntil(':'); //Message from the web
       
+      InSerialStr = LoRaSerial.readStringUntil(':'); //Message from the web
       if(InSerialStr.startsWith("Update RFtag:")){
         for(byte i = 0; i < 7; i++){
           RegisteredRFtag[i] = LoRaSerial.read();
         }
       }
       
-      if(InSerialStr == "Check"){
+      InSerialStr = LoRaSerial.readStringUntil('\n');
+      if(InSerialStr.startsWith == "Check"){
         checkActiv = 1; //check 활성화
       }
       
@@ -125,17 +126,17 @@ static void vLoRa(void *arg){
     
     else{ //일괄적으로 모아서 전송
       if (runEvery(random(10000,20000))){ //10sec ~ 20sec 사이에서 임의로 전송
-      LoRaSerial.print("AT+SEND=1,11+UID_length,LockerUID :");
+      LoRaSerial.print("AT+SEND=1,11"+UID_length+",LockerUID :");
       LoRaSerial.print(LockerUID);
       
-      //RFID 전송
+      //RFID를 통한 반납여부 전송
       LoRaSerial.print("AT+SEND=1,32,RFID");
       Serial.print("LoRa status: Sending message to gateway");
       for(byte i = 0; i < 7; i++){ //불출 반납 상황 송신: 불출여부
-        LoRaSerial.print(PhoneStatus[2][i]);
-        Serial.print(PhoneStatus[2][i]);
+        LoRaSerial.print(PhoneStatus[1][i]);
+        Serial.print(PhoneStatus[1][i]);
       }
-      //Check 
+      //무게 전송
       LoRaSerial.print("AT+SEND=1,33,Check");
       Serial.print("Weight check result :");
       for(byte i=0; i < 7, i++){
@@ -144,14 +145,11 @@ static void vLoRa(void *arg){
       }
       //DOOR 전송
       if(unlockedHolder){
-        String messStr += "AT+SEND=1,53,"; //이곳에 gateway address 1 대신 입력
-        messStr += door //53byte
+        String messStr += "AT+SEND=1,5,Door";
+        messStr += door 
         LoRaSerial.println(messStr);
       }
       
-      LoRaSerial.println();
-      LoRaSerial.println("AT+SEND=1,3,END");
-    
     }
   }
 }
