@@ -23,6 +23,8 @@ IoT와 Web기술을 접목하여 휴대폰에 부착된 NFC 인가 필증과 장
 - 최신 2개 버전, 점유율 1% 이상, 지원 종료 되지 않은 브라우저 버전을 목표로 빌드됩니다.
 
 ### 하드웨어
+- Pathname, MAC address 입력을 위한 ArduinoIDE
+- ETHERNET LAN 서비스
 
 ## 기술 스택
 ### 백앤드
@@ -37,10 +39,12 @@ IoT와 Web기술을 접목하여 휴대폰에 부착된 NFC 인가 필증과 장
 - REST with axios 
 
 ### 하드웨어(IoT)
-- Arduino mega + FreeRTOS
-- LoRa
+- Holder: Arduino mega + FreeRTOS
+- Gateway: Arduino Uno + JSON
+- LoRa Transmitter
 - modeling with TinkerCad
-- NFC + FSR + Magnetic door sensor
+- Holder: NFC + FSR + Magnetic door sensor
+- Gateway: Ethernet Shield
 - HMAC based Auth
 
 ## 설치 안내
@@ -70,6 +74,15 @@ sudo ./output/backend
 - 백앤드 서버가 프론트앤드 서빙과 api 서버의 역할을 겸하므로 별도의 웹서버는 필요하지 않습니다.
 - `make serve`의 경우 리슨 포트에 따라 sudo가 필요하지 않습니다만, 기본 설정은 80포트입니다.
 
+### 하드웨어
+Holder는 사용할 위치에 배치하여 전원을 인가하고, Gateway는 LAN선과 연결해준다.
+
+Gateway는 MAC주소와 HTTP Request할 세부경로를 세부 설정해야 합니다.
+```
+IoT_LeaveItUs_797IsPalindrome/ArduinoCode/Gateway.ino 코드에
+1) MAC 주소에 부대별 고유 MAC 주소를 설정해준다.
+2) String pathname에 HTTP request할 URL에서 hostname을 제외하고 ""속에 입력해준다. 
+```
 ## 프로젝트 사용법
 
 ## 팀 정보 (Team Information)
