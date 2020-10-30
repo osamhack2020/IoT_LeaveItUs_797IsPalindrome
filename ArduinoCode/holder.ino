@@ -1,6 +1,5 @@
 #include <MFRC522.h>
 #include <Arduino_FreeRTOS.h>
-#include <semphr.h>
 #include <Arduino.h>
 #include <SoftwareSerial.h>
 #include "FSR.h"
@@ -16,7 +15,7 @@
 #define DOORSWITCH	2 
 #define RFID_PIN_RST	3 
 #define RFID_PIN_SDA	53 
-
+boolean runEvery(unsigned long interval);
 
 MFRC522 rfid(RFID_PIN_SDA,RFID_PIN_RST); //pin 53 & 3
 
@@ -26,7 +25,7 @@ String RegisteredRFtag[7]; //string of registered RFtag
 String UID_from_rfid; //Info read from rfid
 byte door; //휴대폰 보관함이 열려있음을 알린다.
 bool checkActiv;
-String LockerUID = abcdef;//보관함 UID를 ASCII 문자열로 EEPROM에 저장
+String LockerUID = "abcdef";//제조시 보관함 UID를 ASCII 문자열로 EEPROM에 저장
 byte UID_length= LockerUID.length(); //UID의 길이/바이트 수
 
 
@@ -107,7 +106,7 @@ static void vLoRa(void *arg){
   String InSerialStr = "";
   while(1){
     if(LoRaSerial.available()){
-      String determinator = LoRaSerial.read();
+      String determinator = LoRaSerial.readString();
       while(determinator != LockerUID); //해당 보관함의 UID와 같아야 데이터 수신
       
       InSerialStr = LoRaSerial.readStringUntil(':'); //Message from the web
@@ -118,7 +117,7 @@ static void vLoRa(void *arg){
       }
       
       InSerialStr = LoRaSerial.readStringUntil('\n');
-      if(InSerialStr.startsWith == "Check"){
+      if(InSerialStr.startsWith("Check")){
         checkActiv = 1; //check 활성화
       }
       
@@ -126,7 +125,7 @@ static void vLoRa(void *arg){
     
     else{ //일괄적으로 모아서 전송
       if (runEvery(random(10000,20000))){ //10sec ~ 20sec 사이에서 임의로 전송
-      LoRaSerial.print("AT+SEND=1,11"+UID_length+",LockerUID :");
+      LoRaSerial.print("AT+SEND=1,11"+(String)UID_length+",LockerUID :");
       LoRaSerial.print(LockerUID);
       
       //RFID를 통한 반납여부 전송
@@ -139,22 +138,21 @@ static void vLoRa(void *arg){
       //무게 전송
       LoRaSerial.print("AT+SEND=1,33,Check");
       Serial.print("Weight check result :");
-      for(byte i=0; i < 7, i++){
+      for(byte i=0; i < 7; i++){
         LoRaSerial.print(PhoneStatus[0][i]);
         Serial.print(PhoneStatus[0][i]);
       }
       //DOOR 전송
-      if(unlockedHolder){
-        String messStr += "AT+SEND=1,5,Door";
-        messStr += door 
-        LoRaSerial.println(messStr);
+      String messStr = {};
+      messStr += "AT+SEND=1,5,Door";
+      messStr += door;
+      LoRaSerial.println(messStr);
       }
-      
     }
   }
 }
-void setup() 
-{
+
+void setup(){
     Serial.begin(115200);
     LoRaSerial.begin(115200);
     while (!Serial);
@@ -185,10 +183,9 @@ void setup()
     
 }
 
-void loop() {} //NO LOOP
+void loop(){} //NO LOOP
 
-boolean runEvery(unsigned long interval)
-{
+boolean runEvery(unsigned long interval){
   static unsigned long previousMillis = 0;
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= interval)
@@ -196,5 +193,6 @@ boolean runEvery(unsigned long interval)
     previousMillis = currentMillis;
     return true;
   }
-  return false;
+  else
+    return false;
 }
