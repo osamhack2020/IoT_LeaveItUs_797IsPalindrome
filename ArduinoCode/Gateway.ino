@@ -1,15 +1,14 @@
 #include <SoftwareSerial.h>
 #include <Ethernet.h>
 #include <ArduinoJson.h>
-#include <Time.h>
-#include <TimeLib.h>
+
 #include <SPI.h>              // include libraries
-#include <LoRa.h>
+
 
 byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED}; //부대별 고유 mac 주소 설정
 
 char hostname = "gcp.kimdictor.kr";
-String pathname = "/abcdef"; //알맞는 경로 설정 필요!!
+String pathname = "/api/locker/"; //뒤에{라커 UID}/tag or /door형식으로 요청
 int SERVER_PORT = 80;
   //connect to HTTP server
 EthernetClient client;
@@ -39,7 +38,7 @@ void setup() {
   Serial.print("AT+NETWORKID=5\r\n"); //게이트웨이와 보관함이 같아야 한다
   
   Serial.println("Initialize Ethernet");
-  While(!Ethernet.begin(mac));
+  while(!Ethernet.begin(mac));
 }
 
 void loop() {
@@ -53,25 +52,29 @@ void loop() {
     from_lora_uid = from_lora_uid.substring(12);
     
     Inputbuffer = Serial.readStringUntil('\n');
-    if(int index = Inputbuffer.find("RFID"))
+    if(int index = Inputbuffer.indexOf("RFID"))
       for(byte i = 0; i < 7; i++){
         from_lora_return[i] = Inputbuffer[index+i+4];
       }
     
     Inputbuffer = Serial.readStringUntil('\n');
-    if(int index = Inputbuffer.find("Check"))
+    if(int index = Inputbuffer.indexOf("Check"))
       for(byte i = 0; i < 7; i++){
         from_lora_weight[i] = Inputbuffer[index+i+5];
       }
     
     Inputbuffer = Serial.readStringUntil('\n');
-    if(int index = Inputbuffer.find("Door"))
+    if(int index = Inputbuffer.indexOf("Door"))
       door = Inputbuffer[index+4];
   }
 
   else{//수신중이 아닐때: node로 데이터 분배
-    LoRaSerial.println("AT+SEND=1,"+ UID_length + ',' + from_server_uid);
-    LoRaSerial.println("AT+SEND=1,69," + from_server_rfid);//8byte UID * 7 + "Update RFtag:"
+    LoRaSerial.println("AT+SEND=1,"+ (String)UID_length + ',' + from_server_uid);
+    LoRaSerial.println("AT+SEND=1,69,");
+    for(byte i = 0; i < 7; i++){
+      LoRaSerial.print(from_server_rfid[i]);//8byte UID * 7 + "Update RFtag:"
+    }
+    LoRaSerial.println();
     LoRaSerial.println("AT+SEND=1,5,Check");  
     
   }
@@ -86,15 +89,17 @@ void httpRequest_nodedata(){//보관함 업데이트 사항 서버에 올림
   
   String jsondata = "";
 
-  StaticJsonBuffer<200> jsonBuffer;
-  JsonObject& outbuf = jsonBuffer.createObject();
-  outbuf["uid"] = from_lora_uid;
-  outbuf["door"] = door;
-  outbuf["RFID"] = object.assign({},from_lora_return); //String array
-  outbuf["Phone Status"] = object.assign({},PhoneStatus);
-
-  .printTo(jsondata);
-  Serial.println(jsondata);
+  StaticJsonDocument<200> jsonDoc;
+  JsonObject outdoc = jsonDoc.to<JsonObject>();
+  outdoc["uid"] = from_lora_uid;
+  outdoc["door"] = door;
+  for(byte i = 0; i < 7; i++){
+    outdoc["RFID"].add(from_lora_return[i]);
+    outdoc["Phone Status"].add((String)from_lora_weight[i]);
+  }
+  
+  serializeJsonPretty(outdoc, jsondata);
+  //Serial.println(jsondata);
   
 
   if(!client.connect(hostname, SERVER_PORT)){
@@ -105,17 +110,22 @@ void httpRequest_nodedata(){//보관함 업데이트 사항 서버에 올림
   Serial.print(F("Connected!"));
   
   //Send HTTP request
-  client.println(F("POST " + pathname + " HTTP/1.0"));
-  client.print(F("HOST:" + String(hostname)));
+  client.print("POST "); client.print(pathname); 
+  client.print(from_lora_uid);client.println(" HTTP/1.0");
+  
+  client.print("HOST:"); client.println(String(hostname));
   client.println("Connection: close");
   client.println(jsondata);
   client.println(F(""));
   
   client.flush();
   client.stop();//client connection stop
+  
 }
 
+
 void httpRequest_serverdata(){//서버로부터 업데이트 사항 받아옴
+
   Serial.println("get server data");
   while(!client.connect(hostname,SERVER_PORT));
   Serial.println(F("Connected"));
@@ -130,14 +140,13 @@ void httpRequest_serverdata(){//서버로부터 업데이트 사항 받아옴
   client.println();
   
   while(client.available()){
-  String jsondata = client.read();
+    String jsondata = client.readString();
   
-  StaticJsonBuffer<200> jsonBuffer;
-  JsonObject& inbuf = jsonBuffer.parseObject(jsondata);
-  
-  inbuf.printTo(jsondata);
-  for(byte i =0; i < 7; i++){
-    from_server_rfid = jsondata["rfid"][i]; //허가된 RFID tag
-  from_server_uid = jsondata["uid"];//업데이트 대상 보관함의 UID
-  
+    StaticJsonDocument<200> jsonDoc;
+    deserializeJson(jsonDoc, jsondata);
+
+    copyArray(jsonDoc["RFID"], from_server_rfid);
+    from_server_uid = jsondata["uid"];//업데이트 대상 보관함의 UID
+  }
+    
 }
