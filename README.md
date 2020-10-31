@@ -1,7 +1,7 @@
 # **맡기시오** (팀 *797은거꾸로해도797*)
 ![팀 로고](logo.png)
 
-[**문서**](document) | [**발표자료**](PPT) | [**WEB 저장소**](https://github.com/osamhack2020/WEB_LeaveItUs_797IsPalindrome) | [**IoT 저장소**](https://github.com/osamhack2020/IoT_LeaveItUs_797IsPalindrome)
+[**문서**](document) | [**발표자료**](PPT) | [**WEB 저장소**](https://github.com/osamhack2020/WEB_LeaveItUs_797IsPalindrome) | [**IoT 저장소**](https://github.com/osamhack2020/IoT_LeaveItUs_797IsPalindrome) | [**데모**](http://gcp.kimdictor.kr/)
 
 ## 소개 및 설명 동영상
 **맡기시오 (Leave It Us)**
