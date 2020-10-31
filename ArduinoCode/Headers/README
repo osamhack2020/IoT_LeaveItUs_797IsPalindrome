@@ -1,6 +1,7 @@
 헤더 목록
-freertos.h
-FSR.h
-RFID.h
-AnalogReader.h
-SoftwareSerial.h
+freertos.h -GNU
+FSR.h -GNU
+RFID.h -public
+MFRC522.h - public
+AnalogReader.h -GNU
+SoftwareSerial.h - [Creative Commons Attribution-ShareAlike 3.0 License] (https://creativecommons.org/licenses/by-sa/3.0/)
