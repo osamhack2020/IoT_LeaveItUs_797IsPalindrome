@@ -9,8 +9,11 @@
 IoT와 Web기술을 접목하여 휴대폰에 부착된 NFC 인가 필증과 장착된 휴대폰들의 중량등을 인식한 결과를 처리하여 신뢰할 수 있는 반납 상태를 서버로 전송하기 때문에 당직계통이 일일히 인가된 유일한 휴대폰 제출 여부등을 확인하는데 발생하는 번거로움을 덜 수 있으며 웹페이지를 이용해 PC나 모바일 기기에서 원격으로 관리 가능합니다. 
 일일 병력 현황과 연동하여 유연한 반납 계획 수립 및 보관함 자체에 설치된 개폐 도어를 이용한 불출/반납 시간 관리같은 여러 부가기능 또한 지원합니다.
 
+
+[시연영상](https://www.youtube.com/watch?v=-X2Q5mPk3jw)
+
 ## 기능 설계
-![아키텍처](diagram/architecture.png)
+![아키텍처](document/diagram/architecture.png)
 
 ## 컴퓨터 구성 / 필수 조건 안내
 ### 백앤드
@@ -23,8 +26,8 @@ IoT와 Web기술을 접목하여 휴대폰에 부착된 NFC 인가 필증과 장
 - 최신 2개 버전, 점유율 1% 이상, 지원 종료 되지 않은 브라우저 버전을 목표로 빌드됩니다.
 
 ### 하드웨어
-- Pathname, MAC address 입력을 위한 ArduinoIDE
-- ETHERNET LAN 서비스
+- Pathname, MAC address 입력을 위한 Arduino IDE
+- 이더넷 LAN
 
 ## 기술 스택
 ### 백앤드
@@ -39,12 +42,10 @@ IoT와 Web기술을 접목하여 휴대폰에 부착된 NFC 인가 필증과 장
 - REST with axios 
 
 ### 하드웨어(IoT)
-- Holder: Arduino mega + FreeRTOS
-- Gateway: Arduino Uno + JSON
-- LoRa Transmitter
+- Arduino mega + FreeRTOS
+- LoRa
 - modeling with TinkerCad
-- Holder: NFC + FSR + Magnetic door sensor
-- Gateway: Ethernet Shield
+- NFC + FSR + Magnetic door sensor
 - HMAC based Auth
 
 ## 설치 안내
@@ -74,7 +75,7 @@ sudo ./output/backend
 - 백앤드 서버가 프론트앤드 서빙과 api 서버의 역할을 겸하므로 별도의 웹서버는 필요하지 않습니다.
 - `make serve`의 경우 리슨 포트에 따라 sudo가 필요하지 않습니다만, 기본 설정은 80포트입니다.
 
-### 하드웨어
+## 프로젝트 사용법
 Holder는 사용할 위치에 배치하여 전원을 인가하고, Gateway는 LAN선과 연결해준다.
 
 Gateway는 MAC주소와 HTTP Request할 세부경로를 세부 설정해야 합니다.
@@ -82,13 +83,13 @@ Gateway는 MAC주소와 HTTP Request할 세부경로를 세부 설정해야 합�
 IoT_LeaveItUs_797IsPalindrome/ArduinoCode/Gateway.ino 코드에
 MAC 주소에 부대별 고유 MAC 주소를 설정해준다.
 ```
-## 프로젝트 사용법
 
 ## 팀 정보 (Team Information)
 - 김정현 (kimdictor@gmail.com), Github [Dictor](https://github.com/Dictor)
 - 김상윤 (ndkim11@naver.com), Github [ndkim11](https://github.com/ndkim11)
 
 ## 저작권 및 사용권 정보
+[오픈소스 라이센스](OPENSOURCE_LICENSE.md)
 [AGPL](LICENSE)
 ```
 Project "Leave It Us", Cellphone management system of consisted with web and iot.  
