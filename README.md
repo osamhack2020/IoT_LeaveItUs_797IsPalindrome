@@ -77,7 +77,7 @@ sudo ./output/backend
 
 ## 프로젝트 사용법
 - Holder는 사용할 위치에 배치하여 전원을 인가하고, Gateway는 LAN선과 연결해줍니다.
-- Gateway는 MAC주소와 HTTP Request할 세부경로를 세부 설정해야 합니다.
+- Gateway는 MAC주소를 설정해야 합니다.
 ```
 IoT_LeaveItUs_797IsPalindrome/ArduinoCode/Gateway.ino 코드에
 MAC 주소에 부대별 고유 MAC 주소를 설정해준다.
