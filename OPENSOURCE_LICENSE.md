@@ -39,7 +39,7 @@ The below attributed softwares may be contained or used in this software.
 - MIT License
 - https://github.com/feilipu/Arduino_FreeRTOS_Library
 
-### FSR.h 
+### FSR.h, AnalogReader.h 
 - Copyright (C) 2016 Roboplan Technologies
 - GNU General Public License version 3
 
@@ -47,9 +47,6 @@ The below attributed softwares may be contained or used in this software.
 - Created by Miguel Balboa, Jan, 2012. 
 - The Unlicense (Public domain)
 - https://github.com/miguelbalboa/rfid
-
-### AnalogReader.h 
-- GNU
 
 #### SoftwareSerial.h
 - www.arduino.cc

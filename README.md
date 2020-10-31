@@ -1,7 +1,7 @@
 # **맡기시오** (팀 *797은거꾸로해도797*)
 ![팀 로고](logo.png)
 
-[**문서**](document) | [**WEB 저장소**](https://github.com/osamhack2020/WEB_LeaveItUs_797IsPalindrome) | [**IoT 저장소**](https://github.com/osamhack2020/IoT_LeaveItUs_797IsPalindrome)
+[**문서**](document) | [**발표자료**](PPT) | [**WEB 저장소**](https://github.com/osamhack2020/WEB_LeaveItUs_797IsPalindrome) | [**IoT 저장소**](https://github.com/osamhack2020/IoT_LeaveItUs_797IsPalindrome)
 
 ## 소개 및 설명 동영상
 **맡기시오 (Leave It Us)**
@@ -76,20 +76,23 @@ sudo ./output/backend
 - `make serve`의 경우 리슨 포트에 따라 sudo가 필요하지 않습니다만, 기본 설정은 80포트입니다.
 
 ## 프로젝트 사용법
-Holder는 사용할 위치에 배치하여 전원을 인가하고, Gateway는 LAN선과 연결해준다.
-
-Gateway는 MAC주소와 HTTP Request할 세부경로를 세부 설정해야 합니다.
+- Holder는 사용할 위치에 배치하여 전원을 인가하고, Gateway는 LAN선과 연결해줍니다.
+- Gateway는 MAC주소와 HTTP Request할 세부경로를 세부 설정해야 합니다.
 ```
 IoT_LeaveItUs_797IsPalindrome/ArduinoCode/Gateway.ino 코드에
 MAC 주소에 부대별 고유 MAC 주소를 설정해준다.
 ```
+- 이후 serve 명령으로 서버를 실행하고 웹브라우저로 서버에 접속합니다.
+- 자세한 내용은 시연 영상을 참고해주세요!
 
 ## 팀 정보 (Team Information)
 - 김정현 (kimdictor@gmail.com), Github [Dictor](https://github.com/Dictor)
 - 김상윤 (ndkim11@naver.com), Github [ndkim11](https://github.com/ndkim11)
 
 ## 저작권 및 사용권 정보
-[오픈소스 라이센스](OPENSOURCE_LICENSE.md)
+**[오픈소스 라이센스](OPENSOURCE_LICENSE.md)**
+
+
 [AGPL](LICENSE)
 ```
 Project "Leave It Us", Cellphone management system of consisted with web and iot.  
